@@ -21,6 +21,12 @@ A simple web application for downloading videos from YouTube, Facebook, Reddit, 
 3. **Access the application:**
    Open your browser and go to `http://localhost:5000`
 
+## Demo Video
+
+Watch this short demo to see the app in action:
+
+[![Video Downloader Demo](https://img.youtube.com/vi/Xr4xrYZyRNQ/maxresdefault.jpg)](https://www.youtube.com/shorts/Xr4xrYZyRNQ)
+
 ## Usage
 
 1. Paste a video URL
