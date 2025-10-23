@@ -12,10 +12,10 @@ A simple web application for downloading videos from YouTube, Facebook, Reddit, 
     cd video-downloader-cursor
     ```
 
-2. **Start with Docker Compose:**
+2. **Start the application:**
 
     ```bash
-    docker-compose up -d
+    bash start.sh
     ```
 
 3. **Access the application:**
@@ -32,24 +32,25 @@ A simple web application for downloading videos from YouTube, Facebook, Reddit, 
 ## Docker Commands
 
 ```bash
-# Start
-docker-compose up -d
+# Start (recommended - stops existing containers and builds fresh)
+bash start.sh
 
-# Stop
-docker-compose down
-
-# View logs
-docker-compose logs -f
+# Manual Docker Compose commands
+docker-compose up -d --build    # Start with fresh build
+docker-compose down             # Stop containers
+docker-compose logs -f          # View logs
 ```
 
 ## Features
 
 -   Video preview with metadata
--   Quality selection
+-   Quality selection with language filtering (English/Hungarian audio)
 -   Real-time download progress
 -   File management (download/delete/rename)
--   Responsive design
+-   Video player with streaming support
+-   Responsive design with dark/light theme
 -   Unicode support
+-   Smart filename generation
 
 ## Technology Stack
 
