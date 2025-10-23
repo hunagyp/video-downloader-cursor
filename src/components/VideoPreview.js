@@ -189,7 +189,8 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
             videoInfo,
             filteredFormats[0]
         );
-        if (smartFilename && !filename) {
+        // if (smartFilename && !filename) {
+        if (smartFilename) {
             setFilename(smartFilename);
         }
     }, [
