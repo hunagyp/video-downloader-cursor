@@ -43,10 +43,12 @@ COPY --from=frontend-builder /app/build ./build
 # Copy application files
 COPY app.py .
 COPY config/ ./config/
+COPY entrypoint.sh .
 
-# Create necessary directories
+# Create necessary directories and set permissions
 RUN mkdir -p /app/data /app/config \
-    && chown -R appuser:appuser /app
+    && chown -R appuser:appuser /app \
+    && chmod +x /app/entrypoint.sh
 
 # Switch to non-root user
 USER appuser
@@ -61,5 +63,6 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/api/test || exit 1
 
-# Run the application
+# Run the application with entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--worker-class", "sync", "--worker-connections", "1000", "--max-requests", "1000", "--max-requests-jitter", "100", "--timeout", "30", "--keep-alive", "2", "app:app"]
