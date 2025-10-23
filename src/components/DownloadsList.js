@@ -8,16 +8,19 @@ import {
     Edit2,
     Monitor,
     Clock,
+    Play,
 } from "lucide-react";
 import {
     formatFileSize,
     formatDuration,
     extractDomain,
 } from "../utils/helpers";
+import VideoPlayer from "./VideoPlayer";
 
 const DownloadsList = ({ downloads, onDownload, onDelete, onRename }) => {
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
+    const [selectedVideo, setSelectedVideo] = useState(null);
 
     const handleRenameStart = (download) => {
         setEditingId(download.id);
@@ -43,6 +46,18 @@ const DownloadsList = ({ downloads, onDownload, onDelete, onRename }) => {
         } else if (e.key === "Escape") {
             handleRenameCancel();
         }
+    };
+
+    const handlePlayVideo = (download) => {
+        setSelectedVideo(download);
+    };
+
+    const handleCloseVideo = () => {
+        setSelectedVideo(null);
+    };
+
+    const handleVideoDownload = (downloadId) => {
+        onDownload(downloadId);
     };
     if (downloads.length === 0) {
         return (
@@ -168,6 +183,14 @@ const DownloadsList = ({ downloads, onDownload, onDelete, onRename }) => {
 
                             <div className="flex items-center space-x-2 ml-4">
                                 <button
+                                    onClick={() => handlePlayVideo(download)}
+                                    className="p-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors duration-300"
+                                    title="Play video"
+                                >
+                                    <Play className="w-5 h-5" />
+                                </button>
+
+                                <button
                                     onClick={() => onDownload(download.id)}
                                     className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-300"
                                     title="Download to computer"
@@ -195,6 +218,15 @@ const DownloadsList = ({ downloads, onDownload, onDelete, onRename }) => {
                     </div>
                 ))}
             </div>
+
+            {/* Video Player Popup */}
+            {selectedVideo && (
+                <VideoPlayer
+                    video={selectedVideo}
+                    onClose={handleCloseVideo}
+                    onDownload={handleVideoDownload}
+                />
+            )}
         </div>
     );
 };

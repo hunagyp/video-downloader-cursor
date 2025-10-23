@@ -392,6 +392,42 @@ def download_file(download_id):
     
     return send_file(filepath, as_attachment=True, download_name=filename)
 
+@app.route('/api/stream-file/<int:download_id>', methods=['GET'])
+def stream_file(download_id):
+    """Stream file for video player (no download attachment)"""
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT filepath, filename FROM downloads WHERE id = ?', (download_id,))
+    result = cursor.fetchone()
+    conn.close()
+    
+    if not result:
+        abort(404)
+    
+    filepath, filename = result
+    
+    if not os.path.exists(filepath):
+        abort(404)
+    
+    # Determine MIME type based on file extension
+    file_ext = os.path.splitext(filename)[1].lower()
+    mime_types = {
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.mkv': 'video/x-matroska',
+        '.avi': 'video/x-msvideo',
+        '.mov': 'video/quicktime',
+        '.flv': 'video/x-flv',
+        '.wmv': 'video/x-ms-wmv',
+        '.m4v': 'video/x-m4v',
+        '.3gp': 'video/3gpp',
+        '.ogv': 'video/ogg'
+    }
+    
+    mimetype = mime_types.get(file_ext, 'video/mp4')
+    
+    return send_file(filepath, mimetype=mimetype, as_attachment=False)
+
 @app.route('/api/delete-file/<int:download_id>', methods=['DELETE'])
 def delete_file(download_id):
     """Delete file from server"""
