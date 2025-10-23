@@ -1,6 +1,7 @@
 # Video Downloader
 
 A simple web application for downloading videos from YouTube, Facebook, Reddit, and more platforms.
+(pure vibe coded magic, and a bit of me)
 
 ## Quick Start
 
