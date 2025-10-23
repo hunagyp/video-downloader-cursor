@@ -417,6 +417,13 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
                                                                         0
                                                                 )}
                                                             </span>
+                                                            {format.language &&
+                                                                format.language !==
+                                                                    "unknown" && (
+                                                                    <span className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded">
+                                                                        {format.language.toUpperCase()}
+                                                                    </span>
+                                                                )}
                                                             {format.vcodec &&
                                                                 format.vcodec !==
                                                                     "Unknown" && (

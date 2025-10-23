@@ -121,6 +121,9 @@ def get_video_info():
                 'no_warnings': True,
                 'extract_flat': False,
                 'encoding': 'utf-8',
+                'writesubtitles': False,
+                'writeautomaticsub': False,
+                'listsubtitles': False,
             }
             
             print("Starting yt-dlp extraction...")
@@ -165,6 +168,7 @@ def get_video_info():
                     print(f"Processing {len(formats)} formats...")
                     for fmt in formats:
                         print(f"Format: {fmt.get('format_id')} - {fmt.get('ext')} - {fmt.get('resolution')} - vcodec: {fmt.get('vcodec')} - acodec: {fmt.get('acodec')}")
+                        
                         # Skip formats without video (but allow audio-only for some platforms)
                         if fmt.get('vcodec') == 'none':
                             continue
@@ -176,6 +180,27 @@ def get_video_info():
                         
                         # Include all common video formats (be more permissive)
                         if fmt.get('ext') not in ['mp4', 'webm', 'mkv', 'm4a', 'flv', 'avi', 'mov', 'wmv', '3gp']:
+                            continue
+                        
+                        # Language filtering: Only allow English and Hungarian audio
+                        audio_language_raw = fmt.get('language')
+                        audio_language = audio_language_raw.lower() if audio_language_raw else ''
+                        language_preference = fmt.get('language_preference', 0)
+                        
+                        # Check if format has explicit language info
+                        has_language_info = audio_language or language_preference > 0
+        
+                        # If format has language info and it's not English/Hungarian, skip it
+                        if has_language_info:
+                            if audio_language not in ['en', 'eng', 'english', 'hu', 'hun', 'hungarian', 'magyar', '']:
+                                print(f"Skipping format {fmt.get('format_id')} due to language: {audio_language}")
+                                continue
+                        
+                        # Additional check: Look for language codes in format note or description
+                        format_note_raw = fmt.get('format_note')
+                        format_note = format_note_raw.lower() if format_note_raw else ''
+                        if format_note and any(lang in format_note for lang in ['deutsch', 'german', 'de', 'ger']):
+                            print(f"Skipping format {fmt.get('format_id')} due to German language detected in format note: {format_note}")
                             continue
                         
                         # Use actual file size if available, otherwise estimate
@@ -219,7 +244,9 @@ def get_video_info():
                             'acodec': fmt.get('acodec', 'Unknown'),
                             'quality': fmt.get('quality', 0),
                             'format_note': fmt.get('format_note', ''),
-                            'tbr': fmt.get('tbr', 0)  # Total bitrate
+                            'tbr': fmt.get('tbr', 0),  # Total bitrate
+                            'language': audio_language or 'unknown',  # Add language info
+                            'language_preference': language_preference
                         }
                         
                         # Skip formats with incomplete critical information
