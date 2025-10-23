@@ -68,7 +68,7 @@ downloads.db
 .cache/
 
 # Database files (keep structure, ignore data)
-data/downloads.db
+downloads.db
 
 # Downloaded video files
 data/*.mp4
