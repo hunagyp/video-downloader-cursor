@@ -73,8 +73,12 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
             .filter((r) => {
                 // Filter out 240p and 360p resolutions
                 if (r.includes("x")) {
-                    const [width] = r.split("x").map(Number);
-                    return width >= 480; // Only show 480p and above
+                    const [width, height] = r.split("x").map(Number);
+                    const totalPixels = width * height;
+
+                    // Exclude 360p and below (640x360 = 230,400 pixels)
+                    // 480p = 854x480 = 409,920 pixels
+                    return totalPixels >= 400000; // Only show 480p and above
                 }
                 return true;
             })
@@ -98,6 +102,7 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
     const getFilteredFormats = useCallback(() => {
         if (!videoInfo.formats) return [];
         return videoInfo.formats.filter((format) => {
+            // When "All Resolutions" is selected, show all formats regardless of resolution
             const resolutionMatch =
                 resolutionFilter === "all" ||
                 format.resolution === resolutionFilter;
@@ -118,8 +123,7 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
         if (totalPixels >= 1920 * 1080) return "1080p";
         if (totalPixels >= 1280 * 720) return "720p";
         if (totalPixels >= 854 * 480) return "480p";
-        if (totalPixels >= 640 * 360) return "360p";
-        if (totalPixels >= 426 * 240) return "240p";
+        // Skip 360p and below - not needed
         return resolution;
     };
 
@@ -203,6 +207,19 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
         if (savedResolutionFilter) setResolutionFilter(savedResolutionFilter);
         if (savedFormatFilter) setFormatFilter(savedFormatFilter);
     }, []);
+
+    // Set best resolution as default when videoInfo changes (only if no manual selection made)
+    React.useEffect(() => {
+        if (videoInfo.formats && videoInfo.formats.length > 0) {
+            const availableResolutions = getAvailableResolutions();
+            if (availableResolutions.length > 0) {
+                // Only set default if resolutionFilter is still "all" (no manual selection)
+                if (resolutionFilter === "all") {
+                    setResolutionFilter(availableResolutions[0]);
+                }
+            }
+        }
+    }, [videoInfo]); // Only depend on videoInfo, not getAvailableResolutions
 
     // Save filter preferences to localStorage
     React.useEffect(() => {
@@ -406,17 +423,6 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
                                                                     }
                                                                 </span>
                                                             )}
-                                                        </div>
-
-                                                        {/* Compact details line */}
-                                                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                                                            <span>
-                                                                Size:{" "}
-                                                                {formatFileSize(
-                                                                    format.filesize ||
-                                                                        0
-                                                                )}
-                                                            </span>
                                                             {format.language &&
                                                                 format.language !==
                                                                     "unknown" && (
@@ -424,10 +430,21 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
                                                                         {format.language.toUpperCase()}
                                                                     </span>
                                                                 )}
+                                                        </div>
+
+                                                        {/* Compact details line */}
+                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                                                            <span className="whitespace-nowrap">
+                                                                Size:{" "}
+                                                                {formatFileSize(
+                                                                    format.filesize ||
+                                                                        0
+                                                                )}
+                                                            </span>
                                                             {format.vcodec &&
                                                                 format.vcodec !==
                                                                     "Unknown" && (
-                                                                    <span>
+                                                                    <span className="whitespace-nowrap">
                                                                         Codec:{" "}
                                                                         {
                                                                             format.vcodec
@@ -437,7 +454,7 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
                                                             {formatBitrate(
                                                                 format.tbr
                                                             ) && (
-                                                                <span>
+                                                                <span className="whitespace-nowrap">
                                                                     Bitrate:{" "}
                                                                     {formatBitrate(
                                                                         format.tbr
@@ -448,7 +465,7 @@ const VideoPreview = ({ videoInfo, onDownload }) => {
                                                             {format.fps &&
                                                                 format.fps >
                                                                     0 && (
-                                                                    <span>
+                                                                    <span className="whitespace-nowrap">
                                                                         FPS:{" "}
                                                                         {
                                                                             format.fps
